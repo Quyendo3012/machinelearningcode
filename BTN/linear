@@ -1,0 +1,44 @@
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+import numpy as np
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import Ridge
+
+data = pd.read_csv('Student_Marks.csv')
+
+dtTrain, dtTest = train_test_split(data,test_size = 0.3, shuffle = False) # chia du lieu dt_train va dt_test voi ti le 70 , 30 cua du lieu goc data , shuffle ko de xa tron du lieu trc khi chay
+
+XTrain = dtTrain[['number_courses', 'time_study']]
+YTrain = dtTrain["Marks"]
+
+XTest = dtTest[['number_courses', 'time_study']]
+YTest = dtTest["Marks"]
+
+reg = LinearRegression().fit(XTrain, YTrain) # huan luyen giua x_train , y_train de tim ra mqh tuyen tinh 
+
+XTest = np.array([[4, 5 ]])
+y_pred = reg.predict(XTest) # du doan gia tri y dua tren x-test bang mo hinh hoi quy reg
+y = np.array(YTest)
+
+print("Predicted Price:", y_pred)
+
+
+# print("Coefficient of determination: %.2f"% r2_score(Y_Test, y_pred)) # dự đoán chênh lệch y_test và y_pred
+# print("Thuc te         Du doan            Chenh lech")
+# print("--------------------------------------------------")
+# for i in range(0,len(y)):
+    
+#   print("%.2f" %y[i]," ",y_pred[i]," ",abs(y[i]-y_pred[i]))
+
+
+model2 = Ridge().fit(XTrain, YTrain) #tạo mô hình Ridge và huấn luyện nó trên dữ liệu huấn luyện
+y_pred2= model2.predict(XTest)
+print("Ket qua Ridge",y_pred2[:3]) 
+# in ra 3 cột giá trị từ 0 đến 2
+
+
+model3 = Lasso().fit(XTrain, YTrain)
+y_pred3= model3.predict(XTest)
+print("Ket qua Lasso",y_pred3[:3])
+# print("Ket qua thuc te",Y_Test[:3])

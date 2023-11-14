@@ -1,0 +1,34 @@
+import numpy as np 
+import pandas as pd 
+from sklearn.model_selection import train_test_split 
+from sklearn import  svm, preprocessing
+from sklearn.metrics import precision_score,mean_absolute_error, recall_score, f1_score
+
+data = pd.read_csv('Iris.csv') 
+le=preprocessing.LabelEncoder() #Chuyển đổi các nhãn thành dữ liệu số nguyên
+data=data.apply(le.fit_transform) 
+
+dt_Train, dt_Test = train_test_split(data, test_size=0.3, shuffle = True) 
+X_train = dt_Train.drop(['Id','Species' ], axis = 1) 
+y_train = dt_Train['Species'] 
+X_test= dt_Test.drop(['Id','Species' ], axis = 1)
+y_test= dt_Test['Species']
+y_test = np.array(y_test)
+
+pla = svm.SVC( tol=1e-4, kernel='rbf') #tol mac dinh la 1e-3, c mac dinh la 1
+
+pla.fit(X_train, y_train) 
+y_predict = pla.predict(X_test) 
+
+y_pred = pla.predict(X_test)
+count = 0 
+for i in range(0,len(y_predict)) : 
+    if(y_test[i] == y_predict[i]) : 
+        count = count +1 
+print('Tỷ lệ dự đoán đúng Accuracy: ', count/len(y_predict))
+print("Độ đo Precision:",precision_score(y_test, y_pred, average ='macro')) # Precision (độ chuẩn xác) tỉ lệ số điểm Positive (dự đoán đúng) / tổng số điểm mô hình dự đoán là Positive
+#càng cao càng tốt tức là tất cả số điểm đều đúng 
+print("Độ đo Recall:",recall_score(y_test, y_pred, average ='micro')) #Recall tỉ lệ số điểm Positive mô hình dự đoán đúng trên tổng số điểm được gán nhãn là Positive ban đầu
+#Recall càng cao, tức là số điểm là positive bị bỏ sót càng ít
+#micro tbc của precision và recall theo các lớp.
+print("Độ đo F1:", f1_score(y_test, y_pred, average='macro'))

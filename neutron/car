@@ -1,0 +1,41 @@
+from sklearn.neural_network import MLPClassifier
+from sklearn.datasets import make_classification
+import numpy as np 
+import pandas as pd 
+from sklearn.model_selection import train_test_split 
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn import preprocessing 
+
+data = pd.read_csv('cars.csv')                              #phân loại lớp ngẫu nhiên trong đó n_sample : số lượng mẫu ; 
+X, y = make_classification(n_samples=100, random_state=1) # radom_state: phân chia các tập dữ liệu và kiểm tra một cách ngẫu nhiên với value =1 thì mỗi khi chạy sẽ chạy ra bộ dữ liệu phân tách giống nhau
+le=preprocessing.LabelEncoder()                           
+data=data.apply(le.fit_transform) # chuyển đổi các nhãn thành dữ liệu số nguyên
+dt_Train, dt_Test = train_test_split(data, test_size=0.3, shuffle = True)  # lấy 30% cho tập test và 70% cho train và  trộn ngẫu nhiên
+X_train = dt_Train.drop(['stt','acceptability'], axis = 1) # bỏ cột stt và acceptability lấy dữ liệu các cột còn lại
+y_train = dt_Train['acceptability']  # lấy dữ liệu cột acceptability
+X_test= dt_Test.drop(['stt','acceptability'], axis = 1)
+y_test= dt_Test['acceptability']
+y_test = np.array(y_test) # ép kiểu về mảng
+# print(X_train)
+# print(y_train)
+# print(X_test)
+clf = MLPClassifier(activation= 'tanh', max_iter = 900, hidden_layer_sizes=(120,40)).fit(X_train, y_train) # max_iter = 700 : lặp tối đa 700 lần , activation= 'identity': trả về hàm f(x)=x; hidden_layer_sizes=(120,50) gòm 2 lớp ẩn - lớp ẩn 1 gồm 120 đơn vị ẩn, lớp ẩn 2 gồm 50 đơn vị ẩn
+clf.predict_proba(X_test[:4]) # dự đoán phần trăm xác suất ở cột cuối
+
+clf.fit(X_train, y_train) # huấn luyện trên mô hình X_train và y_train
+y_predict = clf.predict(X_test) # dự đoán trên tập X_test
+count = 0 
+for i in range(0,len(y_predict)) : # tìm số lần dự đoán chính xác trong các dự đoán
+    if(y_test[i] == y_predict[i]) :  # nếu i test  bằng y dự đoán 
+        count = count + 1 # thì số lần đúng sẽ cộng thêm 1
+print('Tỷ lệ dự đoán đúng : ', count/len(y_predict))
+print('Accuracy: ',accuracy_score(y_test, y_predict)) #Accuracy hay độ chính xác
+print('Precision: ',precision_score(y_test, y_predict,average='micro')) # Precision (độ chuẩn xác) tỉ lệ số điểm Positive (dự đoán đúng) / tổng số điểm mô hình dự đoán là Positive
+#càng cao càng tốt tức là tất cả số điểm đều đúng 
+print('Recall: ',recall_score(y_test, y_predict,average='micro')) #Recall tỉ lệ số điểm Positive mô hình dự đoán đúng trên tổng số điểm được gán nhãn là Positive ban đầu
+#Recall càng cao, tức là số điểm là positive bị bỏ sót càng ít
+#micro tbc của precision và recall theo các lớp
+
+

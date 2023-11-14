@@ -1,0 +1,69 @@
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import Perceptron
+from sklearn.metrics import accuracy_score
+import pandas as pd
+import numpy as np
+class PerceptronCustom:
+    def __init__(self, learning_rate=0.01, n_iterations=1000):#khởi tạo tạo tốc độ và số lần lặp
+        self.learning_rate = learning_rate
+        self.n_iterations = n_iterations
+        self.weights = None
+        self.bias = None
+
+    def fit(self, X, y):#huấn luyện mô hình
+        n_samples, n_features = X.shape
+        self.weights = np.zeros(n_features)
+        self.bias = 0
+
+        for _ in range(self.n_iterations):
+            for i in range(n_samples):
+                linear_output = np.dot(X[i], self.weights) + self.bias
+                predicted = self.predict_instance(linear_output)
+                update = self.learning_rate * (y[i] - predicted)
+                self.weights += update * X[i]
+                self.bias += update
+
+    def predict_instance(self, linear_output): #dự đoán nhãn cho 1 phiên bản dựa trên đầu ra của tuyến tính
+        return 1 if linear_output >= 0 else 0
+
+    def predict(self, X):#dự đoán nhãn toàn bộ dữ liệu
+        y_pred = []
+        for i in range(X.shape[0]):
+            linear_output = np.dot(X[i], self.weights) + self.bias
+            y_pred.append(self.predict_instance(linear_output))
+        return np.array(y_pred)
+
+df = pd.read_csv('Iris.csv')
+
+X_data = np.array(df[["Id"  ,"SepalLengthCm" ,"SepalWidthCm" ,"PetalLengthCm" ,"PetalWidthCm" ,"Species"]].values)
+data=X_data
+dt_Train, dt_Test = train_test_split(data, test_size=0.3, shuffle = False)
+print(dt_Train)
+
+X_train = dt_Train[:1, :5]
+y_train = dt_Train[:, 5]
+X_test = dt_Test[:1, :5]
+y_test = dt_Test[:, 5]
+
+pla = PerceptronCustom()
+pla.fit(X_train, y_train)
+y_predict = pla.predict(X_test)
+
+count = 0
+
+# Chia dữ liệu thành các tập huấn luyện và kiểm tra
+dt_Train, dt_Test = train_test_split(data, test_size=0.3, shuffle=True)
+
+# Khởi tạo mô hình PerceptronCustom và huấn luyện
+pla = PerceptronCustom()
+pla.fit(X_train, y_train)
+
+# Dự đoán và tính toán độ chính xác
+y_predict = pla.predict(X_test)
+
+count = sum(1 for y_true, y_pred in zip(y_test, y_predict) if y_true == y_pred)
+
+accuracy = count / len(y_test)
+print(f'Độ chính xác: {accuracy}')
